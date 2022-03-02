@@ -1,0 +1,52 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: spark-demo
+  name: adb
+  labels:
+    app: adb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: adb
+  template:
+    metadata:
+      labels:
+        app: adb
+    spec:
+      containers:
+      - name: adb
+        image: arangodb/arangodb:3.9.0
+        env:
+        - name: ARANGO_ROOT_PASSWORD
+          value: test
+        ports:
+        - containerPort: 8529
+        livenessProbe:
+          tcpSocket:
+            port: 8529
+        readinessProbe:
+          httpGet:
+            path: /_api/version
+            port: 8529
+            httpHeaders:
+              - name: Authorization
+                value: Basic cm9vdDp0ZXN0
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: spark-demo
+  name: adb
+  labels:
+    app: adb
+spec:
+  ports:
+    - port: 8529
+      protocol: TCP
+      targetPort: 8529
+  selector:
+    app: adb
+  type: ClusterIP
