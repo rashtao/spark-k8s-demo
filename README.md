@@ -16,27 +16,29 @@ This demo requires:
 - docker
 - minikube
 
-## Prepare the environment
+## Run
 
 ```shell
 # install Spark 3.1.2
-minikube start --cpus 4 --memory 8192
-eval $(minikube -p minikube docker-env)
 cd $SPARK_HOME
+eval $(minikube -p minikube docker-env)
 ./bin/docker-image-tool.sh \
   -m \
   -b java_image_tag=11-jre-slim \
   -t v3.1.2 \
   build
 
+# ArangoDB must be reachable using the same hostname in the driver and in the executors
+sudo echo "127.0.0.1 adb" >> /etc/hosts
+
+# setup k8s
+minikube start
 kubectl create ns spark-demo
 kubectl apply -f k8s/adb.yaml
 kubectl wait --for=condition=ready pod -l app=adb -n spark-demo
 kubectl port-forward service/adb 8529:8529 -n spark-demo &
 
-# ArangoDB must be reachable using the same hostname in the driver and in the executors
-sudo echo "127.0.0.1 adb" >> /etc/hosts
-
+# import sample data
 ./k8s/import.sh
 
 K8S_SERVER=$(kubectl config view --output=jsonpath='{.clusters[].cluster.server}')
