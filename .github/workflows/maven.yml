@@ -50,9 +50,10 @@ jobs:
         run: sudo echo "127.0.0.1 adb" | sudo tee -a /etc/hosts
       - name: Check DB
         run: curl -v -u root:test http://adb:8529/_api/version
-
+      - name: Import data
+        run: ./k8s/import.sh
       - name: Test
         run: |
           K8S_SERVER=$(kubectl config view --output=jsonpath='{.clusters[].cluster.server}')
           echo $K8S_SERVER
-#          mvn -B -e --no-transfer-progress test -DsparkMaster=k8s://$K8S_SERVER
+          mvn -B -e --no-transfer-progress test -DsparkMaster=k8s://$K8S_SERVER

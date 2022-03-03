@@ -37,32 +37,7 @@ kubectl port-forward service/adb 8529:8529 -n spark-demo &
 # ArangoDB must be reachable using the same hostname in the driver and in the executors
 sudo echo "127.0.0.1 adb" >> /etc/hosts
 
-for c in movies persons; do
-  arangoimp \
-    --server.endpoint=http+tcp://adb:8529 \
-    --server.password=test \
-    --type json \
-    --file="./k8s/import/$c.jsonl" \
-    --collection="$c" \
-    --create-collection=true \
-    --overwrite=true \
-    --server.database=imdb \
-    --create-database=true
-done 
-
-for c in actedIn directed; do
-  arangoimp \
-    --server.endpoint=http+tcp://adb:8529 \
-    --server.password=test \
-    --type json \
-    --file="./k8s/import/$c.jsonl" \
-    --collection="$c" \
-    --create-collection=true \
-    --overwrite=true \
-    --server.database=imdb \
-    --create-database=true \
-    --create-collection-type=edge
-done 
+./k8s/import.sh
 
 K8S_SERVER=$(kubectl config view --output=jsonpath='{.clusters[].cluster.server}')
 mvn clean test -DsparkMaster=k8s://$K8S_SERVER
