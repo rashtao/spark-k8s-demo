@@ -21,7 +21,7 @@ object Demo {
       .set("spark.kubernetes.container.image", "spark:v3.1.2")
       .set("spark.kubernetes.context", "minikube")
       .set("spark.kubernetes.namespace", "spark-demo")
-//      .set("spark.kubernetes.executor.deleteOnTermination", "false")
+      //      .set("spark.kubernetes.executor.deleteOnTermination", "false")
       .set("spark.executor.instances", "4")
     )
     .getOrCreate
@@ -39,7 +39,6 @@ object Demo {
 
     ReadDemo.readDemo()
     ReadWriteDemo.readWriteDemo()
-    spark.stop
   }
 
 }

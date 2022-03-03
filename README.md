@@ -19,10 +19,7 @@ This demo requires:
 ## Prepare the environment
 
 ```shell
-
-# TODO:
-# - install Spark 3.1.2
-# - customize packages in spark-defaults.conf
+# install Spark 3.1.2
 minikube start --cpus 4 --memory 8192
 eval $(minikube -p minikube docker-env)
 cd $SPARK_HOME
@@ -31,14 +28,13 @@ cd $SPARK_HOME
   -b java_image_tag=11-jre-slim \
   -t v3.1.2 \
   build
+
 kubectl create ns spark-demo
-
-K8S_SERVER=$(kubectl config view --output=jsonpath='{.clusters[].cluster.server}')
-
 kubectl apply -f k8s/adb.yaml
 kubectl wait --for=condition=ready pod -l app=adb -n spark-demo
 kubectl port-forward service/adb 8529:8529 -n spark-demo &
 
+# ArangoDB must be reachable using the same hostname in the driver and in the executors
 sudo echo "127.0.0.1 adb" >> /etc/hosts
 
 for c in movies persons; do
@@ -68,6 +64,7 @@ for c in actedIn directed; do
     --create-collection-type=edge
 done 
 
+K8S_SERVER=$(kubectl config view --output=jsonpath='{.clusters[].cluster.server}')
 mvn clean test -DsparkMaster=k8s://$K8S_SERVER
 ```
 
